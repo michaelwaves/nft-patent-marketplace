@@ -27,12 +27,12 @@ export class Contract extends NearContract {
         the owner_id. 
     */
     constructor({
-        owner_id, 
+        owner_id,
         metadata = {
             spec: "nft-1.0.0",
             name: "NFT Tutorial Contract",
-            symbol: "GOTEAM"
-        } 
+            symbol: "TRADEMINT"
+        }
     }) {
         super()
         this.owner_id = owner_id;
@@ -43,7 +43,7 @@ export class Contract extends NearContract {
     }
 
     default() {
-        return new Contract({owner_id: ''})
+        return new Contract({ owner_id: '' })
     }
 
     /*

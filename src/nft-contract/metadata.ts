@@ -1,5 +1,7 @@
 import { Contract } from ".";
 
+
+
 //defines the payout type we'll be returning as a part of the royalty standards.
 export class Payout {
     payout: { [accountId: string]: bigint };
@@ -16,23 +18,23 @@ export class NFTContractMetadata {
     base_uri?: string;
     reference?: string;
     reference_hash?: string;
-    
+
     constructor(
         {
-            spec, 
-            name, 
-            symbol, 
-            icon, 
-            baseUri, 
-            reference, 
+            spec,
+            name,
+            symbol,
+            icon,
+            baseUri,
+            reference,
             referenceHash
-        }:{ 
-            spec: string, 
-            name: string, 
-            symbol: string, 
-            icon?: string, 
-            baseUri?: string, 
-            reference?: string, 
+        }: {
+            spec: string,
+            name: string,
+            symbol: string,
+            icon?: string,
+            baseUri?: string,
+            reference?: string,
             referenceHash?: string
         }) {
         this.spec = spec  // required, essentially a version like "nft-1.0.0"
@@ -58,35 +60,60 @@ export class TokenMetadata {
     extra?: string;
     reference?: string;
     reference_hash?: string;
+    //patent properties
+    price: string;//price is in sale.ts, this will be initial price
+    properties: {
+        applicationNumber?: string[],
+        patentNumber?: string[],
+        pctNumber?: string[],
+        internationalRegistrationNumber?: string[]
+    };
+    attachmentLinks: string[];
+    attorneyDocketNumber?: string;
 
     constructor(
         {
-            title, 
-            description, 
-            media, 
-            mediaHash, 
-            copies, 
-            issuedAt, 
-            expiresAt, 
-            startsAt, 
-            updatedAt, 
-            extra, 
-            reference, 
-            referenceHash
-        }:{
-            title?: string, 
-            description?: string, 
-            media?: string, 
-            mediaHash?: string, 
-            copies?: number, 
-            issuedAt?: string, 
-            expiresAt?: string, 
-            startsAt?: string, 
-            updatedAt?: string, 
-            extra?: string, 
-            reference?: string, 
-            referenceHash?: string}
-        ) {
+            title,
+            description,
+            media,
+            mediaHash,
+            copies,
+            issuedAt,
+            expiresAt,
+            startsAt,
+            updatedAt,
+            extra,
+            reference,
+            referenceHash,
+            price,
+            properties,
+            attachmentLinks,
+            attorneyDocketNumber
+        }: {
+            title?: string,
+            description?: string,
+            media?: string,
+            mediaHash?: string,
+            copies?: number,
+            issuedAt?: string,
+            expiresAt?: string,
+            startsAt?: string,
+            updatedAt?: string,
+            extra?: string,
+            reference?: string,
+            referenceHash?: string,
+
+            price: string,
+            properties: {
+                applicationNumber?: string[],
+                patentNumber?: string[],
+                pctNumber?: string[],
+                internationalRegistrationNumber?: string[]
+            },
+            attachmentLinks: string[],
+            attorneyDocketNumber?: string,
+        }
+    ) {
         this.title = title // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
         this.description = description // free-form description
         this.media = media // URL to associated media, preferably to decentralized, content-addressed storage
@@ -99,6 +126,10 @@ export class TokenMetadata {
         this.extra = extra // anything extra the NFT wants to store on-chain. Can be stringified JSON.
         this.reference = reference // URL to an off-chain JSON file with more info.
         this.reference_hash = referenceHash // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
+        this.price = price
+        this.attachmentLinks = attachmentLinks
+        this.properties = properties
+        this.attorneyDocketNumber = attorneyDocketNumber
     }
 }
 
@@ -108,25 +139,25 @@ export class Token {
     next_approval_id: number;
     royalty: { [accountId: string]: number };
 
-    constructor({ 
-        ownerId, 
-        approvedAccountIds, 
-        nextApprovalId, 
-        royalty 
-    }:{ 
-        ownerId: string, 
-        approvedAccountIds: { [accountId: string]: number }, 
-        nextApprovalId: number, 
-        royalty: { [accountId: string]: number } 
+    constructor({
+        ownerId,
+        approvedAccountIds,
+        nextApprovalId,
+        royalty
+    }: {
+        ownerId: string,
+        approvedAccountIds: { [accountId: string]: number },
+        nextApprovalId: number,
+        royalty: { [accountId: string]: number }
     }) {
         //owner of the token
         this.owner_id = ownerId,
-        //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
-        this.approved_account_ids = approvedAccountIds,
-        //the next approval ID to give out. 
-        this.next_approval_id = nextApprovalId,
-        //keep track of the royalty percentages for the token in a hash map
-        this.royalty = royalty
+            //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+            this.approved_account_ids = approvedAccountIds,
+            //the next approval ID to give out. 
+            this.next_approval_id = nextApprovalId,
+            //keep track of the royalty percentages for the token in a hash map
+            this.royalty = royalty
     }
 }
 
@@ -138,13 +169,13 @@ export class JsonToken {
     approved_account_ids: { [accountId: string]: number };
     royalty: { [accountId: string]: number };
 
-    constructor({ 
-        tokenId, 
-        ownerId, 
-        metadata, 
-        approvedAccountIds, 
-        royalty 
-    }:{
+    constructor({
+        tokenId,
+        ownerId,
+        metadata,
+        approvedAccountIds,
+        royalty
+    }: {
         tokenId: string,
         ownerId: string,
         metadata: TokenMetadata,
@@ -153,21 +184,21 @@ export class JsonToken {
     }) {
         //token ID
         this.token_id = tokenId,
-        //owner of the token
-        this.owner_id = ownerId,
-        //token metadata
-        this.metadata = metadata,
-        //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
-        this.approved_account_ids = approvedAccountIds,
-        //keep track of the royalty percentages for the token in a hash map
-        this.royalty = royalty
+            //owner of the token
+            this.owner_id = ownerId,
+            //token metadata
+            this.metadata = metadata,
+            //list of approved account IDs that have access to transfer the token. This maps an account ID to an approval ID
+            this.approved_account_ids = approvedAccountIds,
+            //keep track of the royalty percentages for the token in a hash map
+            this.royalty = royalty
     }
 }
 
 //get the information for a specific token ID
 export function internalNftMetadata({
     contract
-}:{
+}: {
     contract: Contract
 }): NFTContractMetadata {
     return contract.metadata;

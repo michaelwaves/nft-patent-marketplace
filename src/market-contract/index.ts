@@ -20,14 +20,14 @@ export const DELIMETER = ".";
 export class Contract extends NearContract {
     //keep track of the owner of the contract
     ownerId: string;
-    
+
     /*
         to keep track of the sales, we map the ContractAndTokenId to a Sale. 
         the ContractAndTokenId is the unique identifier for every sale. It is made
         up of the `contract ID + DELIMITER + token ID`
     */
     sales: UnorderedMap;
-    
+
     //keep track of all the Sale IDs for every account ID
     byOwnerId: LookupMap;
 
@@ -52,7 +52,7 @@ export class Contract extends NearContract {
     }
 
     default() {
-        return new Contract({owner_id: ''})
+        return new Contract({ owner_id: '' })
     }
 
     /*
@@ -92,15 +92,15 @@ export class Contract extends NearContract {
         let ownerId = near.predecessorAccountId();
         //get the amount that the user has by removing them from the map. If they're not in the map, default to 0
         let amount: string = this.storageDeposits.remove(ownerId) as string || "0";
-        
+
         //how many sales is that user taking up currently. This returns a set
         let sales = restoreOwners(this.byOwnerId.get(ownerId));
         //get the length of that set. 
         let len = 0;
         if (sales != null) {
             len = sales.len();
-        }   
-        
+        }
+
         //how much NEAR is being used up for all the current sales on the account 
         let diff = BigInt(len) * STORAGE_PER_SALE;
         //the excess to withdraw is the total storage paid - storage being used up.
@@ -128,7 +128,7 @@ export class Contract extends NearContract {
 
     @view
     //return how much storage an account has paid for
-    storage_balance_of({ account_id }: { account_id: string}): string {
+    storage_balance_of({ account_id }: { account_id: string }): string {
         return this.storageDeposits.get(account_id) as string || "0";
     }
 
@@ -137,26 +137,26 @@ export class Contract extends NearContract {
     */
     @call
     //removes a sale from the market. 
-    remove_sale({nft_contract_id, token_id}:{nft_contract_id: string, token_id: string}) {
-        return internalRemoveSale({contract: this, nftContractId: nft_contract_id, tokenId: token_id});
+    remove_sale({ nft_contract_id, token_id }: { nft_contract_id: string, token_id: string }) {
+        return internalRemoveSale({ contract: this, nftContractId: nft_contract_id, tokenId: token_id });
     }
 
     @call
     //updates the price for a sale on the market
-    update_price({nft_contract_id, token_id, price}:{nft_contract_id: string, token_id: string, price: string}) {
-        return internalUpdatePrice({contract: this, nftContractId: nft_contract_id, tokenId: token_id, price: price});
+    update_price({ nft_contract_id, token_id, price }: { nft_contract_id: string, token_id: string, price: string }) {
+        return internalUpdatePrice({ contract: this, nftContractId: nft_contract_id, tokenId: token_id, price: price });
     }
 
     @call
     //place an offer on a specific sale. The sale will go through as long as your deposit is greater than or equal to the list price
-    offer({nft_contract_id, token_id}:{nft_contract_id: string, token_id: string}) {
-        return internalOffer({contract: this, nftContractId: nft_contract_id, tokenId: token_id});
+    offer({ nft_contract_id, token_id }: { nft_contract_id: string, token_id: string }) {
+        return internalOffer({ contract: this, nftContractId: nft_contract_id, tokenId: token_id });
     }
 
     @call
     //place an offer on a specific sale. The sale will go through as long as your deposit is greater than or equal to the list price
-    resolve_purchase({buyer_id, price}:{buyer_id: string, price: string}) {
-        return internalResolvePurchase({buyerId: buyer_id, price: price});
+    resolve_purchase({ buyer_id, price }: { buyer_id: string, price: string }) {
+        return internalResolvePurchase({ buyerId: buyer_id, price: price });
     }
 
     /*
@@ -165,46 +165,46 @@ export class Contract extends NearContract {
     @view
     //returns the number of sales the marketplace has up (as a string)
     get_supply_sales(): string {
-        return internalSupplySales({contract: this});
+        return internalSupplySales({ contract: this });
     }
 
     @view
     //returns the number of sales for a given account (result is a string)
-    get_supply_by_owner_id({account_id}:{account_id: string}): string {
-        return internalSupplyByOwnerId({contract: this, accountId: account_id});
+    get_supply_by_owner_id({ account_id }: { account_id: string }): string {
+        return internalSupplyByOwnerId({ contract: this, accountId: account_id });
     }
 
     @view
     //returns paginated sale objects for a given account. (result is a vector of sales)
-    get_sales_by_owner_id({account_id, from_index, limit}:{account_id: string, from_index?: string, limit?: number}): Sale[] {
-        return internalSalesByOwnerId({contract: this, accountId: account_id, fromIndex: from_index, limit: limit});
+    get_sales_by_owner_id({ account_id, from_index, limit }: { account_id: string, from_index?: string, limit?: number }): Sale[] {
+        return internalSalesByOwnerId({ contract: this, accountId: account_id, fromIndex: from_index, limit: limit });
     }
 
     @view
     //returns paginated sale objects for a given account. (result is a vector of sales)
-    get_supply_by_nft_contract_id({nft_contract_id}:{nft_contract_id: string}): string {
-        return internalSupplyByNftContractId({contract: this, nftContractId: nft_contract_id});        
+    get_supply_by_nft_contract_id({ nft_contract_id }: { nft_contract_id: string }): string {
+        return internalSupplyByNftContractId({ contract: this, nftContractId: nft_contract_id });
     }
 
     @view
     //returns paginated sale objects associated with a given nft contract. (result is a vector of sales)
-    get_sales_by_nft_contract_id({nft_contract_id, from_index, limit}:{nft_contract_id: string, from_index?: string, limit?: number}): Sale[] {
-        return internalSalesByNftContractId({contract: this, accountId: nft_contract_id, fromIndex: from_index, limit: limit});
+    get_sales_by_nft_contract_id({ nft_contract_id, from_index, limit }: { nft_contract_id: string, from_index?: string, limit?: number }): Sale[] {
+        return internalSalesByNftContractId({ contract: this, accountId: nft_contract_id, fromIndex: from_index, limit: limit });
     }
 
     @view
     //get a sale information for a given unique sale ID (contract + DELIMITER + token ID)
-    get_sale({nft_contract_token}:{nft_contract_token: string}): Sale {
-        return internalGetSale({contract: this, nftContractToken: nft_contract_token});
+    get_sale({ nft_contract_token }: { nft_contract_token: string }): Sale {
+        return internalGetSale({ contract: this, nftContractToken: nft_contract_token });
     }
 
     /*
         APPROVALS
     */
     @call
-        /// where we add the sale because we know nft owner can only call nft_approve
-        nft_on_approve({token_id, owner_id, approval_id, msg}:{token_id: string, owner_id: string, approval_id: number, msg: string}) {
-        return internalNftOnApprove({contract: this, tokenId: token_id, ownerId: owner_id, approvalId: approval_id, msg: msg});
-    }  
+    /// where we add the sale because we know nft owner can only call nft_approve
+    nft_on_approve({ token_id, owner_id, approval_id, msg }: { token_id: string, owner_id: string, approval_id: number, msg: string }) {
+        return internalNftOnApprove({ contract: this, tokenId: token_id, ownerId: owner_id, approvalId: approval_id, msg: msg });
+    }
 
 }

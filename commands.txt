@@ -1,3 +1,58 @@
+//build contracts
+npx near-sdk-js build src/nft-contract/index.ts build/nft.wasm
+npx near-sdk-js build src/market-contract/index.ts build/market.wasm
+
+//deploy contracts
+
+near create-account patents.myu2.testnet --masterAccount myu2.testnet --initialBalance 10
+
+NFT_CONTRACT_ID=patents.myu2.testnet
+
+MAIN_ACCOUNT=myu2.testnet
+
+MAIN_ACCOUNT_2=nicetomeetyu.testnet
+
+near deploy --accountId $NFT_CONTRACT_ID --wasmFile build/nft.wasm
+
+near call $NFT_CONTRACT_ID init '{"owner_id": "'$NFT_CONTRACT_ID'"}' --accountId $NFT_CONTRACT_ID
+
+near call $NFT_CONTRACT_ID nft_mint '{
+	"token_id": "patent-1",
+	"metadata": {
+		"title": "5-(2,5-difluorophenyl)pyrrolidin-1-yl)-3-(1H-pyrazol-1-yl)pyrazolo [1,5-A]pyrimidine derivatives and related compounds as Trk kinase inhibitors for treating cancer",
+		"description": "The application relates to pyrazolo[1,5-a]pyrimidine derivatives of formula (IV) as Trk kinase inhibitors for treating cancer and inflammatory diseases.",
+		"price": "100",
+		"properties": {
+			"applicationNumber": ["04000001"],
+			"patentNumber": ["527572377", "123456789"]
+		},
+		"attachmentLinks": ["https://firebasestorage.googleapis.com/v0/b/trademint-aabe6.appspot.com/o/files%2FLondon-CHAN.pdf?alt=media&token=bbe0ea32-797e-49c5-b263-490f02fd6004"],
+		"attorneyDocketNumber": "12345"
+	}, "receiver_id": "myu2.testnet"
+}' --accountId $MAIN_ACCOUNT --amount 0.1
+
+
+To see the transaction in the transaction explorer, please open this url in your browser
+https://explorer.testnet.near.org/transactions/BjSNJB8ZzJrez8U2yWGcWUT21u39zxbRtFsVqfVM31Kx
+
+near view $NFT_CONTRACT_ID nft_tokens
+
+near call $NFT_CONTRACT_ID nft_approve '{"token_id":"patent-1","account_id":"nicetomeetyu.testnet"}' --accountId $MAIN_ACCOUNT --amount 0.1
+
+//marketplace contract
+near create-account patentmarketplace.myu2.testnet --masterAccount myu2.testnet --initialBalance 10
+
+MARKET_CONTRACT_ID=patentmarketplace.myu2.testnet
+
+near deploy --accountId $MARKET_CONTRACT_ID --wasmFile build/market.wasm
+
+near call $MARKET_CONTRACT_ID init '{"owner_id": "'$MARKET_CONTRACT_ID'"}' --accountId $MARKET_CONTRACT_ID
+
+//approve marketplace contract to transfer token
+near call $NFT_CONTRACT_ID nft_approve '{"token_id":"patent-1","account_id":"patentmarketplace.myu2.testnet"}' --accountId $MAIN_ACCOUNT --amount 0.1
+
+
+//example commands
 near dev-deploy build/contract.wasm -f && source ./neardev/dev-account.env && near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CONTRACT_NAME && near call $CONTRACT_NAME nft_mint '{"token_id": "token-1", "metadata": {"title": "My Non Fungible Team Token", "description": "The Team Most Certainly Goes :)", "media": "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif"}, "receiver_id": "'$CONTRACT_NAME'"}' --accountId $CONTRACT_NAME --amount 0.1 
 
 
